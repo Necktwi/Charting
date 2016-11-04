@@ -37,23 +37,28 @@ echo "TotalNetworkDevices=$TotalNetworkDevices"
 echo "TotalTraffic=$TotalTraffic"
 MaxTraffic=0
 for Addr2 in "${!TrafficFrom[@]}"; do
-    echo "TrafficFrom[$Addr2]=${TrafficFrom[$Addr2]}"
-    if [ ${TrafficFrom[$Addr2]} > $MaxTraffic ]; then \
+    if [ ${TrafficFrom[$Addr2]} -gt $MaxTraffic ]; then \
         MaxTraffic=${TrafficFrom[$Addr2]}
     fi
 done
 echo "MaxTraffic=$MaxTraffic"
+Increment=MaxTraffic/20
+(( ++Increment ))
 declare -A TrafficInRange
-Power2NearMax=1
-while [ $Power2NearMax < $MaxTraffic ]; do
-    (( Power2NearMax=2*Power2NearMax ))
+declare -a TrafficRanges
+Power2NearMax=0
+i=0
+while [[ $MaxTraffic -gt "$Power2NearMax" ]]; do
+    (( Power2NearMax+=Increment ))
     TrafficInRange[$Power2NearMax]=0
-    echo "TrafficInRange[$Power2NearMax]:${TrafficInRange[$Power2NearMax]}"
+    TrafficRanges[$i]=$Power2NearMax
+    (( ++i ))
 done
 
 for Addr2 in "${!TrafficFrom[@]}"; do
-    for Range in "${!TrafficInRange[@]}"; do
-        if [ $Range > ${TrafficFrom[$Addr2]} ]; then \
+    for i in "${!TrafficRanges[@]}"; do
+        Range=${TrafficRanges[$i]}
+        if [ $Range -gt ${TrafficFrom[$Addr2]} ]; then \
             (( ++TrafficInRange[$Range] ))
             break
         fi
@@ -87,16 +92,20 @@ google.setOnLoadCallback(drawChart);
 function drawChart() {
 
 // Create the data table.
-var data = new google.visualization.DataTable();
+data = new google.visualization.DataTable();
 data.addColumn('string', 'Title');
 data.addColumn('number', 'Value');
 data.addRows([
-['Error Percentage', $QUERY1],
-['No Error Percentage', $QUERY2]
+EOF
+for i in "${!TrafficRanges[@]}"; do
+    Range=${TrafficRanges[$i]}
+    echo "['$Range', ${TrafficInRange[$Range]}]," >> $TEMP
+done
+cat >> $TEMP << EOF
 ]);
 
 // Set chart options
-var options = {'title':'Errors',
+var options = {'title':'n',
 'width':400,
 'height':300};
 
@@ -110,6 +119,7 @@ chart.draw(data, options);
 <body>
 <!--Div that will hold the pie chart-->
 <div id="chart_div"></div>
+<div id="Description">Each pie represents % clients traffic producing 'n' number of frames </div>
 </body>
 </html>
 EOF
