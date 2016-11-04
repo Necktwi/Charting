@@ -1,5 +1,3 @@
-#! /usr/local/Cellar/bash/4.4_1/bin/bash
-
 # Substitute for `read -r' that doesn't merge adjacent delimiters.
 # http://stackoverflow.com/questions/4622355/read-in-bash-on-tab-delimited-file-without-empty-fields-collapsing#answer-19538478
 myread() {
@@ -46,10 +44,10 @@ Increment=MaxTraffic/20
 (( ++Increment ))
 declare -A TrafficInRange
 declare -a TrafficRanges
-Power2NearMax=0
+Power2NearMax=1
 i=0
 while [[ $MaxTraffic -gt "$Power2NearMax" ]]; do
-    (( Power2NearMax+=Increment ))
+    (( Power2NearMax*=2 ))
     TrafficInRange[$Power2NearMax]=0
     TrafficRanges[$i]=$Power2NearMax
     (( ++i ))
@@ -105,7 +103,7 @@ cat >> $TEMP << EOF
 ]);
 
 // Set chart options
-var options = {'title':'n',
+var options = {'title':'n frames',
 'width':400,
 'height':300};
 
@@ -119,7 +117,7 @@ chart.draw(data, options);
 <body>
 <!--Div that will hold the pie chart-->
 <div id="chart_div"></div>
-<div id="Description">Each pie represents % clients traffic producing 'n' number of frames </div>
+<div id="Description">Each pie represents fraction of clients producing 'n' number of frames</div>
 </body>
 </html>
 EOF
