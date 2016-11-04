@@ -130,6 +130,7 @@ chart.draw(data, options);
 <div id="chart_div"></div>
 <div id="Description">Each pie represents fraction of clients sending 'n' number of frames.<br/>
 EOF
+Range=${TrafficRanges[0]}
 echo "i.e. $Range clients are sending ${TrafficInRange[$Range]} frames" >> $TEMP
 cat >> $TEMP << EOF
 </div>
