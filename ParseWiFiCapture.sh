@@ -40,12 +40,20 @@ for Addr2 in "${!TrafficFrom[@]}"; do
     fi
 done
 echo "MaxTraffic=$MaxTraffic"
-Increment=MaxTraffic/20
-(( ++Increment ))
+
+# For incremental traffic plot uncomment the below 2 lines and modify traffic division accordingly
+#Increment=MaxTraffic/20
+#(( ++Increment ))
+
 declare -A TrafficInRange
 declare -a TrafficRanges
+
+# For logerthemic traffic plot
 Power2NearMax=1
+
 i=0
+
+# Divide the traffic into ranges
 while [[ $MaxTraffic -gt "$Power2NearMax" ]]; do
     (( Power2NearMax*=2 ))
     TrafficInRange[$Power2NearMax]=0
@@ -53,6 +61,7 @@ while [[ $MaxTraffic -gt "$Power2NearMax" ]]; do
     (( ++i ))
 done
 
+# Associate number of clients and the corresponding count of frames they have sent
 for Addr2 in "${!TrafficFrom[@]}"; do
     for i in "${!TrafficRanges[@]}"; do
         Range=${TrafficRanges[$i]}
@@ -62,6 +71,8 @@ for Addr2 in "${!TrafficFrom[@]}"; do
         fi
     done
 done
+
+# Print the Associated Array
 for Range in "${!TrafficInRange[@]}"; do
     echo "TrafficInRange[$Range]:${TrafficInRange[$Range]}"
 done
@@ -117,7 +128,11 @@ chart.draw(data, options);
 <body>
 <!--Div that will hold the pie chart-->
 <div id="chart_div"></div>
-<div id="Description">Each pie represents fraction of clients producing 'n' number of frames</div>
+<div id="Description">Each pie represents fraction of clients sending 'n' number of frames.<br/>
+EOF
+echo "i.e. $Range clients are sending ${TrafficInRange[$Range]} frames" >> $TEMP
+cat >> $TEMP << EOF
+</div>
 </body>
 </html>
 EOF
